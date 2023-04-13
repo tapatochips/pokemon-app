@@ -22,17 +22,21 @@
             <div class="navbar-nav">
               <a class="nav-link active" aria-current="page" href="/">Home</a>
               <a class="nav-link active" href="{{ url_for('pokemon_form') }}">Pokemon</a>
+              <a class="nav-link active" href="{{ url_for('login') }}">Login</a>
+              <a class="nav-link active" href="{{ url_for('signuppage') }}">Sign Up</a>
+
 
             </div>
           </div>
         </div>
       </nav>
+      {% block content %}
 
 
     <h1>Welcome!</h1>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/js/bootstrap.min.js"></script>
+    {% endblock %}
 </body>
 
 </html>

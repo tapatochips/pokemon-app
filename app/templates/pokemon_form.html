@@ -1,21 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
 <div class="container">
+    <h1>Search for a Pokemon</h1>
+    <form method="POST" action="{{ url_for('pokemon_form') }}" class="row g-3">
+        {{ form.hidden_tag() }}
+        <div class="col-auto">
+            <label for="pokemon_name" class="col-form-label">Enter a Pokemon name:</label>
+        </div>
+        <div class="col-auto">
+            {{ form.pokemon_name(class="form-control")}}
+        </div>
+        <div class="col-auto">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
 
-<h1>Search for a Pokemon</h1>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <div>
-    {{ form.pokemon_name(class= "form-control", placeholder = "Pokemon Name") }}
-    {{ form.pokemon_name }}
-    {{ form.submit }}
-    </div>
-</form>
-
-
-{% if pokemon %}
+    {% if pokemon %}
     <div class="row">
         <div class="col-md-6 offset-md-3">
             <div class="card text-center">
@@ -27,16 +28,20 @@
                     <p class="card-text">Defense: {{ pokemon.defense }}</p>
                     <p class="card-text">Ability: {{ pokemon.ability }}</p>
                 </div>
-                {% else %}
-                <div class="card-body">
-                    <h5 class="card-title">Pokemon not found!</h5>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
-</div>
+    {% else %}
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Pokemon not found!</h5>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<p>Click <a href="{{ url_for('pokemon') }}">here</a> to go back to the Pokemon page.</p>
+    {% endif %}
 
-{% endblock %}
+    {% endblock %}

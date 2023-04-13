@@ -157,7 +157,7 @@ models.py IMPORTS:
     from datetime import datetime
 
     # The rest of models.py looks like:
-    db = SQLAlchemy()
+    db = SQLAlchemy() this goes in __init__
 
     # as many of these as tables:
     class <Name-Of-Table>(db.Model):
