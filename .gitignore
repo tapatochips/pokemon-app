@@ -2,3 +2,4 @@ my_venv/
 .env
 migrations
 __pycache__
+.DS_Store

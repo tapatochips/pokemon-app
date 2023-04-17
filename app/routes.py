@@ -1,14 +1,17 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, flash, redirect, render_template, request, url_for
 from app import app
 from .forms import PokemonForm
 import requests
-from .forms import LoginForm, SignUpForm
+from .forms import LoginForm, SignUpForm, EditProfileForm
 from .models import User
-from flask_login import login_user
+from flask_login import current_user, login_user, logout_user, login_required
+import os
+from .models import db
+
 
 
 '''
-need to make forms in forms.py, need to add routes in routes.py
+need to add profile page and edit profile page
 
 '''
 
@@ -41,15 +44,17 @@ def pokemon_form():
                     'defense': data['stats'][1]['base_stat'],
                     'attack': data['stats'][2]['base_stat'],
                     'image': data['sprites']['front_shiny'],
-                    'ability': data['abilities'][0]['ability']['name']
+                    'ability': data['abilities'][0]['ability']['name'],
+                    'types': ", ".join([t['type']['name'] for t in data['types']])
+
                 }
                 return render_template('pokemon_form.html', pokemon=pokemon_data, form=form)
         else:
-            return ('Pokemon not found!')
-        return render_template('pokemon_form.html', pokemon=pokemon_data, form=form)
+             flash('Pokemon not found!')
+        return render_template('pokemon_form.html', form=form)
     return render_template('pokemon_form.html', form=form)
 
-
+#signup
 @app.route('/signup', methods = ["GET", "POST"])
 def signuppage():
     form = SignUpForm()
@@ -59,18 +64,19 @@ def signuppage():
             email = form.email.data
             username = form.username.data
             password = form.password.data
-            
-            user = User(email, username, password)
+            bio = form.bio.data
+            img_url = form.img_url.data
+            user = User(email, username, password, bio, img_url)
             
             user.save_to_db()
             account = {
                 'email': email,
                 'username': username
             }
-        return render_template('signup.html', form = form, account = account)
+        return redirect(url_for('login'))
     return render_template('signup.html', form = form)
 
-
+#auth
 @app.route('/login', methods = ["GET", "POST"])
 def login():
     form = LoginForm()
@@ -93,6 +99,50 @@ def login():
                 print('Invalid username or password')
                 
     return render_template('login.html', form = form)
+
+#auth
+@app.route('/logout')
+def logMeOut():
+    logout_user()
+    return redirect(url_for('login'))
+
+
+@app.route('/user')
+@login_required
+def user():
+    
+    return render_template('user.html', user=current_user)
+
+
+#auth
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+    if request.method == "POST" and form.validate_on_submit():
+        print('here')
+        edited_user_data = {
+        'email':form.email.data,
+        'username':form.username.data,
+        'password':form.password.data,
+        'bio':form.bio.data,
+        'img_url':form.img_url.data
+        }
+        user = User.query.filter_by(email = edited_user_data['email']).first()
+        if user and user.email != current_user.email:
+            flash('email is already in use', "danger")
+            return redirect(url_for('edit_profile'))
+        try:
+            current_user.from_dict(edited_user_data)
+            current_user.save_to_db()
+            flash('profile updated', "success")
+               
+        except:
+            flash('error updating profile', 'danger')
+            return redirect(url_for('edit_profile'))
+        return redirect(url_for('user'))
+    return render_template('edit_profile.html', form = form)
+
 
 
     

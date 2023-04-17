@@ -198,3 +198,7 @@ forms.py IMPORTS:
 ***NOTE:
     A FORM IS NOT VALID WITHOUT THE SECRET_KEY:  AT THE TOP OF ANY <form> IN HTML ADD
     {{ form.hidden_tag() }}
+
+
+
+    pagination

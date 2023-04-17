@@ -2,10 +2,10 @@
 
 {% block content %}
 <div class="container">
-    <h1>Search for a Pokemon</h1>
-    <form method="POST" action="{{ url_for('pokemon_form') }}" class="row g-3">
+    <h1 style="text-align: center; margin-bottom:25px;">Search for a Pokemon!</h1>
+    <form method="POST" action="{{ url_for('pokemon_form') }}" class="row g-3" style="justify-content: center; margin-bottom: 25px;">
         {{ form.hidden_tag() }}
-        <div class="col-auto">
+        <div class="col-auto mx-5">
             <label for="pokemon_name" class="col-form-label">Enter a Pokemon name:</label>
         </div>
         <div class="col-auto">
@@ -18,7 +18,7 @@
 
     {% if pokemon %}
     <div class="row">
-        <div class="col-md-6 offset-md-3">
+        <div class="col-md-6 offset-md-3 mx-auto">
             <div class="card text-center">
                 <img class="card-img-top" src="{{ pokemon.image }}" alt="{{ pokemon.name }} image">
                 <div class="card-body">
@@ -27,6 +27,7 @@
                     <p class="card-text">Attack: {{ pokemon.attack }}</p>
                     <p class="card-text">Defense: {{ pokemon.defense }}</p>
                     <p class="card-text">Ability: {{ pokemon.ability }}</p>
+                    <p class="card-text">Type: {{ pokemon.types }}</p>
                 </div>
             </div>
         </div>
@@ -36,7 +37,7 @@
         <div class="col-md-6 offset-md-3">
             <div class="card text-center">
                 <div class="card-body">
-                    <h5 class="card-title">Pokemon not found!</h5>
+                    <h5 class="card-title">Search for a Pokemon!</h5>
                 </div>
             </div>
         </div>
