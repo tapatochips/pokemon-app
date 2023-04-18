@@ -7,7 +7,7 @@
         {% if user == current_user %}
         <img src="{{user.img_url}}" alt="" style="max-height:400px; margin-right: 25px; max-width: 400px;">
         <div>
-            <a href="/edit_profile" class="btn btn-primary">Edit your profile</a>
+            <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-primary">Edit your profile</a>
         </div>
         {% endif %}
     </table>

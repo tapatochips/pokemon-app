@@ -26,14 +26,14 @@
           <a class="nav-link active" href="{{ url_for('pokemon_form') }}">Pokemon</a>
           {% if current_user.is_authenticated %}
           <p class="nav-link active">Hello, {{ current_user.username }}</p>
-          <a class="nav-link active" href="/user">Profile</a>
+          <a class="nav-link active" href=" {{ url_for('auth.user') }}">Profile</a>
           
-          <a class="nav-link" href="/logout">Log Out</a>
+          <a class="nav-link" href="{{ url_for('auth.logMeOut') }}">Log Out</a>
           
           {% else %}
           
-          <a class="nav-link active" href="{{ url_for('login') }}">Login</a>
-          <a class="nav-link active" href="{{ url_for('signuppage') }}">Sign Up</a>
+          <a class="nav-link active" href="{{ url_for('auth.login') }}">Login</a>
+          <a class="nav-link active" href="{{ url_for('auth.signuppage') }}">Sign Up</a>
 
 
 
