@@ -3,7 +3,8 @@
 {% block content %}
 <div class="container">
     <h1 style="text-align: center; margin-bottom:25px;">Search for a Pokemon!</h1>
-    <form method="POST" action="{{ url_for('pokemon_form') }}" class="row g-3" style="justify-content: center; margin-bottom: 25px;">
+    <form method="POST" action="{{ url_for('pokemon_form') }}" class="row g-3"
+        style="justify-content: center; margin-bottom: 25px;">
         {{ form.hidden_tag() }}
         <div class="col-auto mx-5">
             <label for="pokemon_name" class="col-form-label">Enter a Pokemon name:</label>
@@ -28,11 +29,17 @@
                     <p class="card-text">Defense: {{ pokemon.defense }}</p>
                     <p class="card-text">Ability: {{ pokemon.ability }}</p>
                     <p class="card-text">Type: {{ pokemon.types }}</p>
-                    
+
+                    <div class="btn-group mt-3" role="group">
+                        <button type="button" class="btn btn-primary btn-rounded" style="margin: 25px; width: 100px;">Catch</button>
+                        <button type="button" class="btn btn-danger btn-rounded" style="margin: 25px; width: 100px;">Release</button>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
+
     {% else %}
     <div class="row">
         <div class="col-md-6 offset-md-3">
