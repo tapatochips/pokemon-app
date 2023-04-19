@@ -27,6 +27,8 @@
           {% if current_user.is_authenticated %}
           <p class="nav-link active me-3">Hello, {{ current_user.username }}</p>
           <a class="nav-link active me-3" href=" {{ url_for('auth.user') }}">Profile</a>
+          <a class="nav-link active me-3" href=" {{ url_for('my_pokemon') }}">My Pokemon</a>
+
           
           <a class="nav-link me-3" href="{{ url_for('auth.logMeOut') }}">Log Out</a>
           

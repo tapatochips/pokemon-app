@@ -1,0 +1,323 @@
+Today we will make timestamps look nice (converting timestamps into a more human readable thing)
+^ Flask-moment
+
+Many-to-many relationships
+
+TWO JOIN TABLES:
+Likes table:
+    a user can have many likes, a post can have many likes
+Comments table:
+    a user can comment many times, a post can have many Comments
+
+Following: 1 user can follow 0 people or many people / be followed by 0 or many people
+    we will make a join table to represent this circularness 
+
+================
+
+Home Page -- explore page:
+List all the users who have ever existed
+
+ROUTES.PY 
+@app.route('/')
+def homePage():
+    users = User.query.all() # gives a list of all users
+
+
+    return render_template('index.html', users=users)
+
+INDEX.html
+{% if current_user.is_authenticated %} <!--Logged in-->
+    <ul class="list-group">
+    {% for u in users %}
+            {% if u.id != current_user.id %}
+                <li class="list-group-item">{{u.username}}</li>
+            {% endif %}
+    {% endfor %}
+    </ul>
+{% else %}
+    <h2>Log in to see the other users</h2>
+{% endif %}
+
+Create the Join Table for Likes:
+-- if you have liked a post, you'll see a filled in heart
+-- if you haven't liked a post, you will see a blank heart
+-- like a checkbox ! 
+-- create a route /like/<post_id> to perform this action
+Likes table: primary key ID= serial, foreign key USER_ID (int), foreign key POST_ID (int)
+    primary key is unnecessary
+What if we don't ever need a PK:
+    # With a Model class we can Like.query()
+    - but if we are never searching for anything using the Like class itself, we could use a Model
+
+user = User.query.get(1) # returns to use the "Sho" user
+
+instead of making a class with a db.Model, we can make a db.Table()
+
+we want something like user.like.all() as a join table 
+
+# Not this, but we are using it for ease
+# class Like(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, nullable=False)
+#     post_id = db.Column(db.Integer, nullable=False) 
+
+db.Table('like', db.Column('user_id'), db.Column('post_id'))
+
+# Whenever we have more information than just FKs in a join table
+    (like a column message)
+Then we want to use a regular class(db.Model) table to make the join table
+
+__tablename__ is a default method in every class(db.Model) 
+    - this value is the lowercase single letter of a class
+    if it is called using PascalCase then it creates it using snakecase
+    like class FollowedByRandomWords would be called the table followed_by_random_words
+
+On our feed, we will make the heart icon buttons - just using regular buttons to be lazy
+
+posts.html
+
+in models.py Post create a relationship
+
+likers = db.relationship('Like', lazy = True)
+
+who likes?
+
+In Terminal, type
+    flask shell
+    - this opens a commandline within the context of our application
+    lets us try one-off lines to test things out
+
+        Example:
+        user = User('peter', 'peter@peter.com', '1234')
+        db.session.add(user)
+        db.session.commit()
+        user
+    
+        p = Post.query.get(1)
+        p.likers -> gives us table of users
+
+        # simulating a like:
+        like = Like(1,1)
+        db.session.add(like)
+        db.session.commit()
+
+        p.likers -> gives us all the people who've liked
+
+        exit() to exit
+
+In Posts (models.py)
+# another way:                   #model we are connecting to, # secondary = tablename of join table
+    people_who_liked = db.relationship('User', secondary='like')
+
+    ^^ with this way, we also have to comment out the likers backref so it works
+    -- adding the secondary is adding a JOIN and this is what's best
+
+    # we can only use one of these
+
+In base: 
+<link rel="stylesheet" href="https://fonts.gstatic.com/s/materialsymbolsoutlined/v105/kJEhBvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oFsLjBuVY.woff2">
+
+8:08PM to get hearts wroking
+
+In Posts.HTML
+
+{% if current_user.is_authenticated %}
+  {% if current_user in p.likers %}
+    <span class="material-symbols-outlined" style="font-variation-settings:
+      'FILL' 1,
+      'wght' 400, 
+      'GRAD' 0,
+      'opsz' 48
+    ">favorite</span>
+  {% else %}
+  <span class="material-symbols-outlined">favorite</span>
+  {% endif %}
+
+{% endif %}
+
+
+Create a route for like and unlike in routes.
+
+@app.route('posts/like/<int:post_id>')
+@login_required
+def likePost(post_id):
+    like = Like(current_user.id, post_id)
+    like.saveToDB()
+    return redirect(url_for('showAllPosts'))
+
+@app.route('posts/unlike/<int:post_id>')
+@login_required
+def unlikePost(post_id):
+    like = Like.query.filter_by(postid=post_id).first() # should only have 1 that matches
+    if like:
+        like.deleteFromDB()
+    return redirect(url_for('showAllPosts'))
+
+Connect hearts to make them buttons:
+make them a tags instead of span tags, give the URL
+
+<a href="{{url_for('unlikePost', post_id=p.id)}}" class="text-decoration-none material-symbols-outlined" style="font-variation-settings:
+      'FILL' 1,
+      'wght' 400, 
+      'GRAD' 0,
+      'opsz' 48
+    ">favorite</a>
+
+
+We are going to have 2 like tables just to try things out, using a db.Table()
+
+in Models.py
+likes = db.Table('like_2', db.Column('user_id'), db.Column('post_id'))
+
+we can also pass in parameters to that ^:
+likes = db.Table('like_2', 
+                db.Column('user_id', db.Integer, db.ForeignKey('user.id'), nullable=False), 
+                db.Column('post_id', db.Integer, db.ForeignKey('post.id'), nullable=False))
+
+we can use our relationship attribute to actually access that table ^
+- this lets us append to the <Post 1>.likers list 
+(8:30PM)
+
+in Post model, create relationship
+
+    # for the Table.db
+    likers_2 = db.relationship('User', secondary='like_2')
+
+In SHELL:
+>>> u = User.query.get(1)
+>>> u.username
+'sho'
+>>> u
+<User 1>
+>>> p = Post.query.get(1)
+>>> p
+<Post 1>
+>>> p.likers_2
+[]
+>>> p.likers_2.append(u)
+>>> p.likers_2
+[<User 1>]
+
+# Even though they are in the list, we must commit!!!
+We do not do db.session.add(obj) because there is no session
+db.session.commit()
+
+****** if Ash can have 3 pikachus then we do need the primary key to get the specific instance ???? 8:38PM
+if Ash can have only 1 pikachu then we need the primary key
+
+A Table.db is like a Set because you are not allowed duplicates. 
+if you happened to have duplicate info it would all be in the table 1x
+impossible to do in a table, you would need a model 
+
+Create a table for followers in the Models class
+# for followers -- note how these both ref the user class
+followers = db.Table('followers',
+       db.Column('follower_id', db.Integer, db.ForeignKey('user.id'), nullable=False),
+       db.Column('followed_id', db.Integer, db.ForeignKey('user.id'), nullable=False)              
+)
+
+right now the user does not have a relstionship to the likes class. we can make one!
+we don't Need to have one but it works. use the secondary to access Posts instead of Like table
+liked_posts = db.relationship('Post', secondary='like', lazy=True)
+
+
+in User, create a relationship for followers/followed
+# get the list of people that I follow
+# we can also do secondary=followers since it's defined above lol                       # we can change backref from backref being a string to being an actual object
+        followed = db.relationship('User', secondary='followers', lazy='dynamic', backref=db.backref('followers', lazy='dynamic'))
+    
+# lazy = 'dynamic'
+
+We need to be explicit about what is on the left and what's on the right
+Followed = Left Table
+Followers (Backref) = Right Table, since it is the backref 
+
+Let's specify this--editing:
+
+followed = db.relationship('User',
+                secondary='followers',
+                lazy='dynamic',
+                backref=db.backref('followers',
+                lazy='dynamic'),        #c. is the column
+                primaryjoin = (followers.c.follower_id == id), # this is the ON for a JOIN from SQL
+                secondaryjoin=(followers.c.followed_id == id)
+                )
+
+followers gives YOUR followers
+followed gives who YOU follow
+
+Create Helper Functions (in the User table):
+def follow(self, user):
+    self.followed.append(user)
+    db.session.commit()
+
+def unfollow(self, user):
+    self.followed.remove(user)
+    db.session.commit()
+
+9:09PM --- idk why my stuff wasn't quite wroking
+Any time you see Lazy you get make lazy a bunch of different things ... bummer this isn't wroking
+
+index.html
+    {% if u in current_user.followed.all() %}
+        <a class="btn btn-danger" href="{{url_for('followUser', user_id = u.id)}}">Unfollow</a>
+    {% else %}
+        <a class="btn btn-primary" href="{{url_for('unfollowUser', user_id = u.id)}}">Follow</a>
+    {% endif %}
+
+routes.py
+@app.route('/follow/<int:user_id>')
+@login_required
+def followUser(user_id):
+    user = User.query.get(user_id)
+    if user:
+        current_user.follow(user)
+    return redirect(url_for('homePage'))
+
+@app.route('/follow/<int:user_id>')
+@login_required
+def unfollowUser(user_id):
+    user = User.query.get(user_id)
+    if user:
+        current_user.unfollow(user)
+    return redirect(url_for('homePage'))
+
+
+pgAdmin -- really good for PostgreSQL
+
+we could also just have 1 route for followUnfollowUser() and put an if-statement
+
+Flask-Moment
+
+flask-moment.readthedocs.io/en/latest/quickstart.html 
+
+pip3 install flask-moment
+
+packaging and flask-moment should be installed
+
+
+__init__.py
+from flask_moment import Moment
+moment = Moment(app)
+
+9:31 {{moment.include moment or something }}  in base.html --> fix this 
+
+in posts.html:
+<p class="card-text"><small class="text-body-secondary">Last updated 3 mins ago</small></p>
+
+Fixing the order of the posts
+showAllPosts in routes
+posts = Post.query.order_by('date_created').desc().all()
+
+from sqlalchemy import desc
+
+9:40PM to get that to work
+
+
+Questions: 
+- flask-moment
+- getting the following to work -> not working with buttons and not working in the shell
+- also can i use the .join I already implemented
+
+- do we have to make the pokemon only allowed to be caught by 1 person
+    ie. only one pikachu can be caught total? only 1 pikachu caught by 'Ash'?

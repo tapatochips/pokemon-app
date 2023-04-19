@@ -2,9 +2,8 @@ from flask import Flask, flash, redirect, render_template, request, url_for
 from app import app
 from .forms import PokemonForm
 import requests
-#from .models import User
-#from flask_login import current_user
-#from .models import db
+from flask_login import current_user
+from .models import db, MyPokemon, Pokemon
 
 
 @app.route('/', methods=['GET'])
@@ -45,7 +44,28 @@ def pokemon_form():
         return render_template('pokemon_form.html', form=form)
     return render_template('pokemon_form.html', form=form)
 
+
+
+
+@app.route('/my_pokemon', methods = ['GET', 'POST'])
+def my_pokemon():
+    # get the ID of the current user
+    user_id = current_user.id
+
+    # retrieve a list of caught pokemon for the current user
+    caught_pokemon = db.session.query(MyPokemon).filter_by(user_id=user_id).all()
+
+    # get details of each caught Pokemon
+    pokemon_list = []
+    for caught in caught_pokemon:
+        pokemon = db.session.query(Pokemon).filter_by(id=caught.pokemon_id).first()
+        pokemon_list.append(pokemon)
+
+    # render the list of caught Pokemon in a template
+    return render_template('my_pokemon.html', pokemon_list=pokemon_list)
+
 #make button to catch and release and save/ delete respectively.
+
 
 
 
