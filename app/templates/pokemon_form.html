@@ -31,8 +31,8 @@
                     <p class="card-text">Type: {{ pokemon.types }}</p>
 
                     <div class="btn-group mt-3" role="group">
-                        <a href="{{ url_for('pokemon_form') }}"><button type="button" class="btn btn-primary btn-rounded" style="margin: 25px; width: 100px;">Catch</button></a>
-                        <a href="{{ url_for('pokemon_form') }}"><button type="button" class="btn btn-danger btn-rounded" style="margin: 25px; width: 100px;">Release</button></a>
+                        <a href="{{ url_for('pokemon_form', pokemon_id=pokemon.id) }}"><button type="button" class="btn btn-primary btn-rounded" style="margin: 25px; width: 100px;">Catch</button></a>
+                        <a href="{{ url_for('my_pokemon') }}"><button type="button" class="btn btn-danger btn-rounded" style="margin: 25px; width: 100px;">Release</button></a>
                     </div>
 
                 </div>

@@ -1,10 +1,28 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-
-
-
-
-
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom:25px;">My Pokemon</h1>
+        {% if pokemon %}
+        <div class="row">
+            <div class="col-md-6 offset-md-3 mx-auto">
+                <div class="card text-center">
+                    <img class="card-img-top" src="{{ pokemon.img_url }}" alt="{{ pokemon.name }} image">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ pokemon.name }}</h5>
+                        <p class="card-text">Stats: {{ pokemon.stats }}</p>
+                        <p class="card-text">HP: {{ pokemon.hp }}</p>
+                        <p class="card-text">Attack: {{ pokemon.attack }}</p>
+                        <p class="card-text">Defense: {{ pokemon.defense }}</p>
+                        <p class="card-text">Ability: {{ pokemon.ability }}</p>
+                        <p class="card-text">Type: {{ pokemon.types }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p>You haven't caught any pokemon yet!</p>
+        {% endif %}
+    </div>
 {% endblock %}
+
