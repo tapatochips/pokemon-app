@@ -8,7 +8,6 @@
   <meta name="Description" content="Enter your description here" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
   <title>Title</title>
 </head>
 
@@ -28,12 +27,12 @@
           <p class="nav-link active me-3">Hello, {{ current_user.username }}</p>
           <a class="nav-link active me-3" href=" {{ url_for('auth.user') }}">Profile</a>
           <a class="nav-link active me-3" href=" {{ url_for('my_pokemon') }}">My Pokemon</a>
+          <a class="nav-link" href="{{ url_for('battle') }}" style="color: white;">Battle</a>
 
           
           <a class="nav-link me-3" href="{{ url_for('auth.logMeOut') }}">Log Out</a>
           
           {% else %}
-          
           <a class="nav-link active me-3" href="{{ url_for('auth.login') }}">Login</a>
           <a class="nav-link active me-3" href="{{ url_for('auth.signuppage') }}">Sign Up</a>
   

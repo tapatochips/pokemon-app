@@ -21,7 +21,7 @@
     <div class="row">
         <div class="col-md-6 offset-md-3 mx-auto">
             <div class="card text-center">
-                <img class="card-img-top" src="{{ pokemon.image }}" alt="{{ pokemon.name }} image">
+                <img class="card-img-top" src="{{ pokemon.img_url }}" alt="{{ pokemon.name }} image">
                 <div class="card-body">
                     <h5 class="card-title">{{ pokemon.name }}</h5>
                     <p class="card-text">HP: {{ pokemon.hp }}</p>
@@ -31,7 +31,7 @@
                     <p class="card-text">Type: {{ pokemon.types }}</p>
 
                     <div class="btn-group mt-3" role="group">
-                        <a href="{{ url_for('pokemon_form', pokemon_id=pokemon.id) }}"><button type="button" class="btn btn-primary btn-rounded" style="margin: 25px; width: 100px;">Catch</button></a>
+                        <a href="{{ url_for('catch_pokemon', name=pokemon.name) }}"><button type="button" class="btn btn-primary btn-rounded" style="margin: 25px; width: 100px;">Catch</button></a>
                         <a href="{{ url_for('my_pokemon') }}"><button type="button" class="btn btn-danger btn-rounded" style="margin: 25px; width: 100px;">Release</button></a>
                     </div>
 

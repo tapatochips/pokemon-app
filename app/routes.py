@@ -3,9 +3,9 @@ from app import app
 from .forms import PokemonForm
 import requests
 from flask_login import current_user
-from .models import db, MyPokemon, Pokemon
+from .models import db, Pokemon
 
-# Set the secret key for session management
+#sets secret key
 app.secret_key = 'my_secret_key'
 
 @app.route('/', methods=['GET'])
@@ -29,94 +29,91 @@ def pokemon_form():
             print(pokemon_name)
             url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name}"
             response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
+            data = response.json()
+            if not response.ok:
+                flash('That pokemon isnt in our database yet, try again in a few years', 'danger')
+            for pokemon in data:
+                pokemon_data = {}
                 pokemon_data = {
-                    # 'stats': data['stats'],
                     'name': data['name'],
                     'hp': data['stats'][0]['base_stat'],
                     'attack': data['stats'][2]['base_stat'],
                     'defense': data['stats'][1]['base_stat'],
-                    'image': data['sprites']['front_shiny'],
+                    'img_url': data['sprites']['front_shiny'],
                     'ability': data['abilities'][0]['ability']['name'],
-                    'types': ", ".join([t['type']['name'] for t in data['types']]),
-                }
-                session['pokemon_data'] = pokemon_data
-                pokemon = pokemon_data  #updates pokemon
-                if 'catch' in request.form:
-                    return redirect(url_for('my_pokemon'))  #redirects if user clicked on catch
-            else:
-                flash('Pokemon not found!')
+                    'type': ", ".join([t['type']['name'] for t in data['types']]),
+                    'id': data['id']
+                    }
+                if not Pokemon.known_pokemon(pokemon_data['name']):
+                    pokemon=Pokemon()
+                    pokemon.from_dict(pokemon_data)
+                    pokemon.saveToDB()
+                    
+            
+        
+        return render_template('pokemon_form.html', form=form, pokemon=pokemon_data)
 
-    return render_template('pokemon_form.html', form=form, pokemon=pokemon)
+    return render_template('pokemon_form.html', form=form)
 
 
 
 @app.route('/my_pokemon', methods=['GET', 'POST'])
 def my_pokemon():
-    user_id = current_user.id
-
-    #gets caught pokemon details
-    caught_pokemon = db.session.query(MyPokemon).filter_by(user_id=user_id).all()
-
-    #gets newly caught pokemon details
-    pokemon_data = session.get('pokemon_data')
-    if pokemon_data:
-        try:
-            pokemon = Pokemon(
-                # stats=pokemon_data['stats'],
-                name=pokemon_data['name'],
-                hp=pokemon_data['stats'][0]['base_stat'],
-                attack=pokemon_data['stats'][1]['base_stat'],
-                defense=pokemon_data['stats'][2]['base_stat'],
-                image=pokemon_data['sprites']['front_shiny'],
-                ability=pokemon_data['abilities'][0]['ability']['name'],
-                types=", ".join([t['type']['name'] for t in pokemon_data['types']])
-            )
-        except KeyError as e:
-            flash(f"Error: Missing key '{e.args[0]}' in pokemon_data dictionary.")
-            return redirect(url_for('pokemon_form'))
-
-        db.session.add(pokemon)
-        db.session.commit()
-        session.pop('pokemon_data', None)
-        caught_pokemon.append(pokemon)
-    else:
-        pokemon = None
-
-    return render_template('my_pokemon.html', pokemon_list=caught_pokemon, pokemon=pokemon)
+    return render_template('my_pokemon.html', team=current_user.pokemon.all())
 
 
-@app.route('/catch_pokemon', methods=['GET'])
-def catch_pokemon():
-    pokemon_data = session.get('pokemon_data')
-    if pokemon_data:
-        flash('You have already caught a pokemon!')
+@app.route('/catch_pokemon/<name>')
+def catch_pokemon(name):
+    pokemon=Pokemon.query.filter_by(name=name).first()
+    if pokemon in current_user.pokemon:
+        flash('You already have caught that pokemon.', 'warning')
+        return redirect(url_for('my_pokemon'))
+    elif current_user.pokemon.count() == 5:
+        flash('Your team is full, if you want to catch a new pokemon, release one.', "danger")
         return redirect(url_for('my_pokemon'))
     else:
-        #gets newly caught pokemon from request
-        pokemon_name = request.args.get('pokemon_name', None)
-        if pokemon_name:
-            #ask api for pokemon data
-            url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name}"
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                pokemon_data = {
-                    # 'stats': data['stats'],
-                    'name': data['name'],
-                    'hp': data['stats'][0]['base_stat'],
-                    'attack': data['stats'][2]['base_stat'],
-                    'defense': data['stats'][1]['base_stat'],
-                    'image': data['sprites']['front_shiny'],
-                    'ability': data['abilities'][0]['ability']['name'],
-                    'types': ", ".join([t['type']['name'] for t in data['types']])
-                }
-                session['pokemon_data'] = pokemon_data
-                return redirect(url_for('my_pokemon', pokemon_data=pokemon_data))
-            else:
-                flash('Pokemon not found!')
+        flash('Added to your team.', "success")
+        current_user.pokemon.append(pokemon)
+        db.session.commit()
+        return redirect(url_for('my_pokemon'))
+
+
+@app.route('/battle', methods=['GET', 'POST'])
+def battle():
+    """for pokemon battle
+
+    Returns:
+        result: this func is for simulating a battle between two Pokemon,
+        then displaying the result for the user
+    """
+    player1_pokemon = session.get('player1_pokemon', None)
+    player2_pokemon = session.get('player2_pokemon', None)
+
+    if player1_pokemon and player2_pokemon:
+        player1_hp = player1_pokemon.hp
+        player2_hp = player2_pokemon.hp
+
+        #does math
+        while player1_hp > 0 and player2_hp > 0:
+            player2_hp -= player1_pokemon.attack
+            if player2_hp <= 0:
+                break
+            player1_hp -= player2_pokemon.attack
+
+        #determines the winner based on who has more HP
+        if player1_hp > player2_hp:
+            winner = player1_pokemon.name
+        elif player2_hp > player1_hp:
+            winner = player2_pokemon.name
         else:
-            flash('No pokemon data found!')
+            winner = "It's a tie!"
+
+        return render_template('battle.html', winner=winner)
+    else:
         return redirect(url_for('pokemon_form'))
 
+
+
+    
+
+#"""    flask run --port 8000    """

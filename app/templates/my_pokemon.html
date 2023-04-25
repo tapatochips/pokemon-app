@@ -3,6 +3,7 @@
 {% block content %}
     <div class="container">
         <h1 style="text-align: center; margin-bottom:25px;">My Pokemon</h1>
+        {% for pokemon in team %}
         {% if pokemon %}
         <div class="row">
             <div class="col-md-6 offset-md-3 mx-auto">
@@ -23,6 +24,7 @@
         {% else %}
         <p>You haven't caught any pokemon yet!</p>
         {% endif %}
+        {% endfor %}
     </div>
 {% endblock %}
 

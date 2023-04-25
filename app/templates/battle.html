@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Select a Pokemon to battle with:</h2>
+{% if user_pokemon %}
+<ul>
+{% for pokemon in user_pokemon %}
+<li>{{ pokemon.name }}</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>You don't have any Pokemon yet!</p>
+{% endif %}
+
+
+    <div class="row">
+      <div class="col-sm-6">
+        <h2>{{ pokemon1.name }}</h2>
+        <img src="{{ pokemon1.img_url }}" alt="{{ pokemon1.name }}" height="200">
+        <p>HP: {{ pokemon1.hp }}</p>
+        <p>Attack: {{ pokemon1.attack }}</p>
+      </div>
+      <div class="col-sm-6">
+        <h2>{{ pokemon2.name }}</h2>
+        <img src="{{ pokemon2.img_url }}" alt="{{ pokemon2.name }}" height="200">
+        <p>HP: {{ pokemon2.hp }}</p>
+        <p>Attack: {{ pokemon2.attack }}</p>
+      </div>
+    </div>
+    <hr>
+    <h2>{{ result }}</h2>
+  {% endif %}
+
+{% endblock %}
+
