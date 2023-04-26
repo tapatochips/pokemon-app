@@ -1,16 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <table class="table">
-        <h1>User: {{ user.username }}</h1>
-        {% if user.bio %}<p>{{ user.bio }}</p>{% endif %}
-        {% if user == current_user %}
-        <img src="{{user.img_url}}" alt="" style="max-height:400px; margin-right: 25px; max-width: 400px;">
-        <div>
-            <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-primary">Edit your profile</a>
-        </div>
+    <div class="container">
+        <h1 class="text-center">User: {{ user.username }}</h1>
+        {% if user.bio %}
+            <p class="text-center">{{ user.bio }}</p>
         {% endif %}
-    </table>
+        {% if user == current_user %}
+            <div class="row justify-content-center align-items-center">
+                <div class="col-md-4">
+                    <img src="{{user.img_url}}" alt="" class="img-fluid" style="max-height:400px;">
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-primary d-block mx-auto mb-3">Edit your profile</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
     <hr>
 {% endblock %}
+
 

@@ -28,7 +28,7 @@
                     <p class="card-text">Attack: {{ pokemon.attack }}</p>
                     <p class="card-text">Defense: {{ pokemon.defense }}</p>
                     <p class="card-text">Ability: {{ pokemon.ability }}</p>
-                    <p class="card-text">Type: {{ pokemon.types }}</p>
+                    <p class="card-text">Type: {{ pokemon.type }}</p>
 
                     <div class="btn-group mt-3" role="group">
                         <a href="{{ url_for('catch_pokemon', name=pokemon.name) }}"><button type="button" class="btn btn-primary btn-rounded" style="margin: 25px; width: 100px;">Catch</button></a>

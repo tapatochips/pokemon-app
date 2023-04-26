@@ -3,7 +3,7 @@ from app import app
 from .forms import PokemonForm
 import requests
 from flask_login import current_user
-from .models import db, Pokemon
+from .models import db, Pokemon, User
 
 #sets secret key
 app.secret_key = 'my_secret_key'
@@ -22,7 +22,7 @@ def pokemon_form():
         and then displaying it in the card for the user
     """
     form = PokemonForm()
-    pokemon = session.get('pokemon_data', None)  #creates pokemon
+    pokemon_data = session.get('pokemon_data', None)  # creates pokemon
     if request.method == 'POST':
         if form.validate():
             pokemon_name = form.pokemon_name.data.lower()
@@ -32,8 +32,7 @@ def pokemon_form():
             data = response.json()
             if not response.ok:
                 flash('That pokemon isnt in our database yet, try again in a few years', 'danger')
-            for pokemon in data:
-                pokemon_data = {}
+            else:
                 pokemon_data = {
                     'name': data['name'],
                     'hp': data['stats'][0]['base_stat'],
@@ -43,23 +42,23 @@ def pokemon_form():
                     'ability': data['abilities'][0]['ability']['name'],
                     'type': ", ".join([t['type']['name'] for t in data['types']]),
                     'id': data['id']
-                    }
+                }
                 if not Pokemon.known_pokemon(pokemon_data['name']):
-                    pokemon=Pokemon()
+                    pokemon = Pokemon()
                     pokemon.from_dict(pokemon_data)
                     pokemon.saveToDB()
-                    
-            
-        
-        return render_template('pokemon_form.html', form=form, pokemon=pokemon_data)
 
-    return render_template('pokemon_form.html', form=form)
+                session['pokemon_data'] = pokemon_data
+
+    return render_template('pokemon_form.html', form=form, pokemon=pokemon_data)
+
+
 
 
 
 @app.route('/my_pokemon', methods=['GET', 'POST'])
 def my_pokemon():
-    return render_template('my_pokemon.html', team=current_user.pokemon.all())
+    return render_template('my_pokemon.html', team=current_user.pokemon.all(), user = current_user)
 
 
 @app.route('/catch_pokemon/<name>')
@@ -77,40 +76,54 @@ def catch_pokemon(name):
         db.session.commit()
         return redirect(url_for('my_pokemon'))
 
-
-@app.route('/battle', methods=['GET', 'POST'])
-def battle():
+        
+@app.route('/battle/<id>')
+def battle(id):
     """for pokemon battle
 
     Returns:
         result: this func is for simulating a battle between two Pokemon,
         then displaying the result for the user
     """
-    player1_pokemon = session.get('player1_pokemon', None)
-    player2_pokemon = session.get('player2_pokemon', None)
+    op = User.query.filter_by(id = id).first()
+    player1_pokemon = current_user.pokemon
+    player2_pokemon = op.pokemon
+    p1_total = 0
+    p2_total = 0
+    for pokemon in player1_pokemon:
+        p1_total += pokemon.hp
+        p1_total += pokemon.attack
+        p1_total += pokemon.defense
+    for pokemon in player2_pokemon:
+        p2_total += pokemon.hp
+        p2_total += pokemon.attack
+        p2_total += pokemon.defense
+    if p2_total > p1_total:
+        flash(f'{op.username} won', 'success')
+    elif p1_total > p2_total:
+        flash(f'{current_user.username} won', 'success')
+    return render_template('show_users.html')
+        
+    
 
-    if player1_pokemon and player2_pokemon:
-        player1_hp = player1_pokemon.hp
-        player2_hp = player2_pokemon.hp
+        
+    
+    
+@app.route('/show_users')
+def show_users():
+    users = User.query.filter(User.id != current_user.id).all()
+    return render_template('show_users.html', users = users)
 
-        #does math
-        while player1_hp > 0 and player2_hp > 0:
-            player2_hp -= player1_pokemon.attack
-            if player2_hp <= 0:
-                break
-            player1_hp -= player2_pokemon.attack
 
-        #determines the winner based on who has more HP
-        if player1_hp > player2_hp:
-            winner = player1_pokemon.name
-        elif player2_hp > player1_hp:
-            winner = player2_pokemon.name
-        else:
-            winner = "It's a tie!"
+@app.route('/op_team/<id>')
+def op_team(id):
+    user = User.query.filter_by(id = id).first()
 
-        return render_template('battle.html', winner=winner)
-    else:
-        return redirect(url_for('pokemon_form'))
+    return render_template('my_pokemon.html', team=user.pokemon.all(), user = user)
+
+    
+    
+
 
 
 

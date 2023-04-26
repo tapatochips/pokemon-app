@@ -27,37 +27,37 @@
           <p class="nav-link active me-3">Hello, {{ current_user.username }}</p>
           <a class="nav-link active me-3" href=" {{ url_for('auth.user') }}">Profile</a>
           <a class="nav-link active me-3" href=" {{ url_for('my_pokemon') }}">My Pokemon</a>
-          <a class="nav-link" href="{{ url_for('battle') }}" style="color: white;">Battle</a>
+          <a class="nav-link active me-3" href="{{ url_for('show_users') }}">Battle</a>
 
-          
+
           <a class="nav-link me-3" href="{{ url_for('auth.logMeOut') }}">Log Out</a>
-          
+
           {% else %}
           <a class="nav-link active me-3" href="{{ url_for('auth.login') }}">Login</a>
           <a class="nav-link active me-3" href="{{ url_for('auth.signuppage') }}">Sign Up</a>
-  
+
           {% endif %}
         </div>
       </div>
     </div>
   </nav>
-  
-  
+
+
   <h1 style="text-align: center">Welcome to the PokeDex!</h1>
   {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for class, message in messages %}
-                <div class="alert alert-{{class}} alert-dismissible fade show" role="alert">
-                    {{message}}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+  {% if messages %}
+  {% for class, message in messages %}
+  <div class="alert alert-{{class}} alert-dismissible fade show" role="alert">
+    {{message}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
   {% block content %}
-  
-  
-  
+
+
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.0/js/bootstrap.min.js"></script>
   {% endblock %}

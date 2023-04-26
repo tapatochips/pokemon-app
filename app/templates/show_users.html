@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    {% for user in users %}
+    <div class="card mb-3" style="max-width: 500px; margin-left:420px;">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="{{user.img_url}}" class="img-fluid rounded-start" alt="avatar">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{user.username}}</h5>
+                    <p class="user card-text">{{user.bio}}</p>
+                    <a href="{{url_for('op_team', id=user.id)}}" class="btn btn-info">View Trainer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
